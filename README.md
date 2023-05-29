@@ -13,7 +13,7 @@ AWS Profile Updater is a utility script written in Python that helps you update 
 1. Clone this repository to your local machine.
 
     ```bash
-    git clone https://github.com/yourusername/aws-profile-updater.git
+    git clone https://github.com/paulovlobato/aws-profile-updater.git
     cd aws-profile-updater
     ```
 
