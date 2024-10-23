@@ -13,64 +13,43 @@ AWS Profile Updater is a utility script written in Python that helps you update 
 1. Clone this repository to your local machine.
 
     ```bash
-    git clone https://github.com/paulovlobato/aws-profile-updater.git
-    cd aws-profile-updater
+    $ git clone https://github.com/paulovlobato/aws-profile-updater.git
     ```
 
 2. Move the script directory to a location that's common for executable scripts, such as `/usr/local/bin`:
 
     ```bash
-    mv /path/to/aws-profile-updater /usr/local/bin
+    $ sudo mv /path/to/aws-profile-updater /usr/local/bin/aws_profile_updater
     ```
 
     Replace `/path/to/aws-profile-updater` with the actual path to your script's directory.
 
-3. Update the PATH environment variable. You can add the following line to your `~/.bash_profile` or `~/.zshrc` file, depending on the shell you are using:
+3. Make the `update_aws_profile.sh` script executable:
 
     ```bash
-    export PATH=$PATH:/usr/local/bin/aws-profile-updater
+    $ sudo chmod +x /usr/local/bin/aws_profile_updater/update_aws_profile.sh
     ```
 
-    Then source the file:
-
-    ```bash
-    source ~/.bash_profile  # if you use bash shell
+4. Create a symbolic link for the script into your `/bin` folder, so you can run it anywhere from your terminal:
+   
     ```
-
-    Or:
-
-    ```bash
-    source ~/.zshrc  # if you use zsh shell
+    $ sudo ln -s /usr/local/bin/aws_profile_updater/aws-profile-updater.sh /usr/local/bin/aws-profile-updater
     ```
-
-4. Make sure the `update_aws_profile.sh` script is executable. If it isn't, run this command to make it so:
-
-    ```bash
-    chmod +x /usr/local/bin/aws-profile-updater/update_aws_profile.sh
-    ```
-
 ## Usage
 
-1. Clone this repository to your local machine.
-
-    ```bash
-    git clone https://github.com/paulovlobato/aws-profile-updater.git
-    cd aws-profile-updater
-    ```
-
-2. Copy your new AWS credentials to your clipboard. Make sure they are in the following format:
+1. Copy your new AWS credentials to your clipboard. Make sure they are in the following format:
 
     ```plaintext
+    [profile_name]
     aws_access_key_id = your_access_key
     aws_secret_access_key = your_secret_key
     aws_session_token = your_session_token
     ```
 
-3. Run the `update_aws_profile.sh` shell script with the name of the AWS profile you want to update as the argument. For example:
+2. Run the `aws-profile-updater` anywhere in your terminal, with the name of the AWS profile you want to update as the argument. For example:
 
     ```bash
-    chmod +x update_aws_profile.sh
-    ./update_aws_profile.sh your_profile_name
+    aws-profile-updater profile_name
     ```
 
     This script automatically fetches the credentials from your clipboard and passes them to the Python script.
@@ -84,3 +63,5 @@ The shell script `update_aws_profile.sh` serves as a handy wrapper that fetches 
 ## Note
 
 Ensure you have the necessary permissions to read and write the `~/.aws/credentials` file.
+
+Also make sure that the profile name is already present in your `~/.aws/credentials` file. The script won't create any new profiles in there, only find the profile and update the credentials.
