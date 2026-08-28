@@ -7,34 +7,20 @@ AWS Profile Updater is a utility script written in Python that helps you update 
 - Python 3
 - An AWS account and access to AWS IAM to generate security credentials.
 - A configured `~/.aws/credentials` file with the profiles you want to update.
+- A clipboard tool for your operating system (see [Clipboard support](#clipboard-support)).
 
 ## Installation
 
-1. Clone this repository to your local machine.
+Install with a single command:
 
-    ```bash
-    $ git clone https://github.com/paulovlobato/aws-profile-updater.git
-    ```
+```bash
+curl -fsSL https://raw.githubusercontent.com/paulovlobato/aws-profile-updater/master/install.sh | bash
+```
 
-2. Move the script directory to a location that's common for executable scripts, such as `/usr/local/bin`:
+This downloads the scripts, installs them to `/usr/local/bin`, and makes the command available as `aws-profile-updater` anywhere in your terminal.
 
-    ```bash
-    $ sudo mv /path/to/aws-profile-updater /usr/local/bin/aws_profile_updater
-    ```
+> **Note:** The installer writes to `/usr/local/bin`, so it may prompt for your password (or you may need to run it with `sudo`).
 
-    Replace `/path/to/aws-profile-updater` with the actual path to your script's directory.
-
-3. Make the `update_aws_profile.sh` script executable:
-
-    ```bash
-    $ sudo chmod +x /usr/local/bin/aws_profile_updater/update_aws_profile.sh
-    ```
-
-4. Create a symbolic link for the script into your `/bin` folder, so you can run it anywhere from your terminal:
-   
-    ```
-    $ sudo ln -s /usr/local/bin/aws_profile_updater/aws-profile-updater.sh /usr/local/bin/aws-profile-updater
-    ```
 ## Usage
 
 1. Copy your new AWS credentials to your clipboard. Make sure they are in the following format:
@@ -54,11 +40,29 @@ AWS Profile Updater is a utility script written in Python that helps you update 
 
     This script automatically fetches the credentials from your clipboard and passes them to the Python script.
 
+## Clipboard support
+
+The wrapper script automatically detects your operating system and uses the appropriate clipboard tool:
+
+| OS | Tool |
+|----|------|
+| macOS | `pbpaste` (built-in) |
+| Linux (Wayland) | `wl-paste` (from `wl-clipboard`) |
+| Linux (X11) | `xclip` or `xsel` |
+| Windows (Git Bash / WSL) | `powershell.exe Get-Clipboard` |
+
+On Linux, if none of these tools are installed, the script will tell you which one to install. For example, on Debian/Ubuntu:
+
+```bash
+sudo apt install xclip        # X11
+sudo apt install wl-clipboard # Wayland
+```
+
 ## Details
 
-The Python script `update_aws_profile.py` does the heavy lifting. It takes two command-line arguments: the name of the AWS profile to update, and a string of new AWS credentials. It then updates the specified AWS profile in your `~/.aws/credentials` file with the new credentials. 
+The Python script `aws_profile_updater.py` does the heavy lifting. It takes two command-line arguments: the name of the AWS profile to update, and a string of new AWS credentials. It then updates the specified AWS profile in your `~/.aws/credentials` file with the new credentials.
 
-The shell script `update_aws_profile.sh` serves as a handy wrapper that fetches the credentials from your clipboard using the `pbpaste` command, and then invokes the Python script with the appropriate arguments.
+The shell script `aws_profile_updater.sh` serves as a handy wrapper that fetches the credentials from your clipboard using the appropriate tool for your operating system, and then invokes the Python script with the appropriate arguments.
 
 ## Note
 
