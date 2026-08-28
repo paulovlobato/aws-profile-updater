@@ -3,7 +3,7 @@
 # Installer for AWS Profile Updater.
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/paulovlobato/aws-profile-updater/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/paulovlobato/aws-profile-updater/master/install.sh | bash
 #
 # Installs the scripts to /usr/local/bin and makes the command
 # available as `aws-profile-updater` anywhere in your terminal.
@@ -12,6 +12,14 @@ set -euo pipefail
 
 INSTALL_DIR="/usr/local/bin"
 REPO_RAW="https://raw.githubusercontent.com/paulovlobato/aws-profile-updater/master"
+
+# If we're not root, re-run ourselves with sudo so the install to
+# /usr/local/bin succeeds even when piped via `curl ... | bash`.
+# (When piped, $0 is "bash", so we re-fetch the script from the URL.)
+if [ "$(id -u)" -ne 0 ]; then
+  echo "Not running as root, re-running with sudo..."
+  exec sudo bash -c "curl -fsSL '$REPO_RAW/install.sh' | bash"
+fi
 
 # Download the two scripts into a temp dir, then move them into place.
 TMP_DIR="$(mktemp -d)"
