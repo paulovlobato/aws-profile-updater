@@ -24,14 +24,22 @@ get_clipboard() {
       pbpaste
       ;;
     Linux)
+      # Prefer the native Wayland tool. Under Wayland, XWayland apps often
+      # advertise only UTF8_STRING, which makes a plain `xclip -o` fail with
+      # "target STRING not available", so ask for that target explicitly first.
       if command -v wl-paste >/dev/null 2>&1; then
-        wl-paste
+        wl-paste 2>/dev/null
       elif command -v xclip >/dev/null 2>&1; then
-        xclip -selection clipboard -o
+        xclip -selection clipboard -o -t UTF8_STRING 2>/dev/null ||
+          xclip -selection clipboard -o 2>/dev/null
       elif command -v xsel >/dev/null 2>&1; then
-        xsel --clipboard --output
+        xsel --clipboard --output 2>/dev/null
       else
-        echo "No clipboard tool found. Install one of: wl-clipboard (Wayland), xclip, or xsel." >&2
+        if [ "${XDG_SESSION_TYPE:-}" = "wayland" ] || [ -n "${WAYLAND_DISPLAY:-}" ]; then
+          echo "No clipboard tool found. Install wl-clipboard: sudo apt install wl-clipboard" >&2
+        else
+          echo "No clipboard tool found. Install one of: wl-clipboard (Wayland), xclip, or xsel." >&2
+        fi
         return 1
       fi
       ;;
@@ -45,10 +53,7 @@ get_clipboard() {
   esac
 }
 
-credentials=$(get_clipboard)
-
-# Check if credentials are available in the clipboard
-if [ -z "$credentials" ]; then
+if ! credentials=$(get_clipboard) || [ -z "$credentials" ]; then
   echo "No credentials found in the clipboard. Please copy the credentials and try again."
   exit 1
 fi

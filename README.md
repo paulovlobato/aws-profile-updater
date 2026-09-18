@@ -23,7 +23,7 @@ This downloads the scripts, installs them to `/usr/local/bin`, and makes the com
 
 ## Usage
 
-1. Copy your new AWS credentials to your clipboard. Make sure they are in the following format:
+1. Copy your new AWS credentials to your clipboard. Either of these formats works:
 
     ```plaintext
     [profile_name]
@@ -31,6 +31,14 @@ This downloads the scripts, installs them to `/usr/local/bin`, and makes the com
     aws_secret_access_key = your_secret_key
     aws_session_token = your_session_token
     ```
+
+    ```bash
+    export AWS_ACCESS_KEY_ID="your_access_key"
+    export AWS_SECRET_ACCESS_KEY="your_secret_key"
+    export AWS_SESSION_TOKEN="your_session_token"
+    ```
+
+    The second format is what the AWS console and `aws configure export-credentials` produce, so it can be copied straight from there.
 
 2. Run the `aws-profile-updater` anywhere in your terminal, with the name of the AWS profile you want to update as the argument. For example:
 
@@ -57,6 +65,8 @@ On Linux, if none of these tools are installed, the script will tell you which o
 sudo apt install xclip        # X11
 sudo apt install wl-clipboard # Wayland
 ```
+
+On a Wayland session, install `wl-clipboard`. Falling back to `xclip` there can fail with `Error: target STRING not available`, because apps only publish the clipboard as `UTF8_STRING`.
 
 ## Details
 

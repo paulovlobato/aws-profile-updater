@@ -2,32 +2,55 @@ import sys
 import configparser
 import os
 
+KEY_NAMES = ('aws_access_key_id', 'aws_secret_access_key', 'aws_session_token')
+REQUIRED_KEY_NAMES = ('aws_access_key_id', 'aws_secret_access_key')
+
+
+def parse_credentials(credentials_str):
+    """Parse clipboard text into a dict of lowercase AWS credential keys.
+
+    Accepts both the `key = value` file format and the shell format that the
+    AWS console and `aws configure export-credentials` produce, e.g.
+    `export AWS_ACCESS_KEY_ID="ASIA..."`.
+    """
+    credentials = {}
+    for line in credentials_str.splitlines():
+        line = line.strip()
+        if line.startswith('export '):
+            line = line[len('export '):].strip()
+        if '=' not in line:
+            continue
+        key, value = line.split('=', 1)
+        key = key.strip().lower()
+        value = value.strip().strip('"').strip("'")
+        if key in KEY_NAMES:
+            credentials[key] = value
+    return credentials
+
+
 def update_aws_credentials(profile_name, credentials_str):
     creds_file_path = os.path.expanduser('~/.aws/credentials')
     parser = configparser.ConfigParser()
     parser.read(creds_file_path)
 
-    # Split the credentials string into separate lines and then split each line into key and value
-    # credentials = dict(line.split('=') for line in credentials_str.split('\n') if line)
-    credentials = {}
-    for line in credentials_str.split('\n'):
-        if line and '=' in line:
-            key, value = line.split('=', 1)
-            credentials[key] = value.strip()
+    credentials = parse_credentials(credentials_str)
 
-    if profile_name in parser.sections():
-        if 'aws_access_key_id' in credentials:
-            parser[profile_name]['aws_access_key_id'] = credentials['aws_access_key_id'].strip()
-        if 'aws_secret_access_key' in credentials:
-            parser[profile_name]['aws_secret_access_key'] = credentials['aws_secret_access_key'].strip()
-        if 'aws_session_token' in credentials:
-            parser[profile_name]['aws_session_token'] = credentials['aws_session_token'].strip()
+    missing = [key for key in REQUIRED_KEY_NAMES if not credentials.get(key)]
+    if missing:
+        print(f"Could not find {', '.join(missing)} in the clipboard contents.")
+        sys.exit(1)
 
-        with open(creds_file_path, 'w') as f:
-            parser.write(f)
-        print(f"Credentials for profile {profile_name} updated.")
-    else:
+    if profile_name not in parser.sections():
         print(f"No such profile {profile_name} exists in the credentials file.")
+        sys.exit(1)
+
+    for key in KEY_NAMES:
+        if credentials.get(key):
+            parser[profile_name][key] = credentials[key]
+
+    with open(creds_file_path, 'w') as f:
+        parser.write(f)
+    print(f"Credentials for profile {profile_name} updated.")
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
